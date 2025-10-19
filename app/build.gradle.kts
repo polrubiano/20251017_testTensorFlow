@@ -43,7 +43,14 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+
+//    implementation("org.tensorflow:tensorflow-lite:2.17.0")
+    implementation(libs.tensorflow.lite)
+//    implementation("org.tensorflow:tensorflow-lite-gpu:2.17.0")
+    implementation(libs.tensorflow.lite.gpu)
+
     testImplementation(libs.junit)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
