@@ -31,6 +31,38 @@
         tools:enabled="true" />
 
     <TextView
+        android:id="@+id/sliderLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/tokens_to_generate"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/generateButton" />
+
+    <TextView
+        android:id="@+id/tokenCountTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@id/sliderLabel"
+        app:layout_constraintStart_toEndOf="@id/sliderLabel"
+        tools:text="15" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/tokenSlider"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:stepSize="1.0"
+        android:value="15.0"
+        android:valueFrom="1.0"
+        android:valueTo="50.0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sliderLabel" />
+
+    <TextView
         android:id="@+id/resultLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -38,7 +70,7 @@
         android:text="@string/result"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/generateButton" />
+        app:layout_constraintTop_toBottomOf="@id/tokenSlider" />
 
     <ScrollView
         android:layout_width="0dp"

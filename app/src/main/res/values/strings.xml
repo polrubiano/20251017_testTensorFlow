@@ -4,5 +4,6 @@
     <string name="generate_text">Generate text</string>
     <string name="generating_text">Generating text\.\.\.</string>
     <string name="result">Result\:</string>
+    <string name="tokens_to_generate">Tokens to generate</string>
     <string name="write_initial_text">Write initial text\.\.\.</string>
 </resources>

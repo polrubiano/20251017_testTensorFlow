@@ -1,5 +1,6 @@
 package pol.rubiano.a1017_testtensorflow
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -31,63 +32,73 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        binding.tokenCountTextView.text = binding.tokenSlider.value.toInt().toString()
+
+        binding.tokenSlider.addOnChangeListener { slider, value, fromUser ->
+            binding.tokenCountTextView.text = value.toInt().toString()
+        }
+
         binding.generateButton.setOnClickListener {
             val prompt = binding.promptEditText.text.toString()
             if (prompt.isNotBlank()) {
                 binding.generateButton.isEnabled = false
                 binding.resultTextView.text = getString(R.string.generating_text)
+                val maxTokens = binding.tokenSlider.value.toInt()
                 CoroutineScope(Dispatchers.Main).launch {
-                    generateText(prompt, maxNewTokens = 15)
+                    generateText(prompt, maxNewTokens = maxTokens)
                 }
             }
         }
     }
 
+
+    @SuppressLint("SetTextI18n")
     private suspend fun generateText(prompt: String, maxNewTokens: Int) {
-        val generatedText = withContext(Dispatchers.Default) {
-            var currentPrompt = prompt
-            val allGeneratedTokens = mutableListOf<String>()
-            // Obtener los IDs del prompt inicial para la primera penalización
-            val allGeneratedTokenIds = model.getTokenIdsForPrompt(prompt).toMutableList()
+        val finalGeneratedText = withContext(Dispatchers.Default) {
+
+            val allTokenIds = model.getTokenIdsForPrompt(prompt).toMutableList()
+
+            val generatedRawTokens = mutableListOf<String>()
 
             for (i in 0 until maxNewTokens) {
-                Log.d("@pol", "Generando token ${i + 1}/$maxNewTokens. Prompt: '$currentPrompt'")
+                Log.d("@pol", "Generando token ${i + 1}/$maxNewTokens. Total IDs: ${allTokenIds.size}")
 
-                val nextToken = model.runInference(currentPrompt, allGeneratedTokenIds)
+                val nextTokenId = model.runInference(allTokenIds.toIntArray(), allTokenIds)
 
-                // --- LÓGICA DE PARADA Y FILTRADO MEJORADA ---
-                if (nextToken == null || nextToken == "<|endoftext|>") {
-                    Log.d("@pol", "Fin de la generación: Token nulo o de fin de texto.")
+                if (nextTokenId == null) {
+                    Log.d("@pol", "Fin de la generación: Token ID nulo.")
                     break
                 }
 
-                // Filtramos los tokens de control o artefactos no deseados
-                if (nextToken.contains("Ċ") || nextToken.contains("âĢ") || nextToken.trim().isEmpty()) {
-                    Log.w("@pol", "Token basura filtrado: '$nextToken'. Continuando...")
-                    continue // Saltar al siguiente ciclo sin añadir este token
+                allTokenIds.add(nextTokenId)
+
+                val nextRawToken = model.cleanTokenFromId(nextTokenId)
+
+                if (nextRawToken == "<|endoftext|>") {
+                    Log.d("@pol", "Fin de la generación: Token de fin de texto.")
+                    break
+                }
+                if (nextRawToken.contains("Ċ") || nextRawToken.contains("âĢ")) {
+                    Log.w("@pol", "Token basura filtrado: '$nextRawToken'. Continuando...")
+                    continue
                 }
 
-                // Condición de parada si genera una frase completa
-                if ( (nextToken.contains(".") || nextToken.contains("?") || nextToken.contains("!")) && allGeneratedTokens.size > 3 ) {
-                    allGeneratedTokens.add(nextToken) // Añadimos el último signo de puntuación
+                generatedRawTokens.add(nextRawToken)
+
+                if ((nextRawToken.contains(".") || nextRawToken.contains("?") || nextRawToken.contains("!")) && generatedRawTokens.size > 3) {
                     Log.d("@pol", "Fin de la generación: Se encontró un signo de puntuación final.")
                     break
                 }
-                // --- FIN DE LA MEJORA ---
-
-                allGeneratedTokens.add(nextToken)
-                model.getTokenIdForToken(nextToken.replace(" ", "Ġ"))?.let {
-                    allGeneratedTokenIds.add(it)
-                }
-                currentPrompt += nextToken
             }
 
-            allGeneratedTokens.joinToString("")
+            val combinedText = generatedRawTokens.joinToString("")
+            combinedText.replace("Ġ", " ")
         }
 
-        binding.resultTextView.text = generatedText
+        binding.resultTextView.text = prompt + finalGeneratedText
         binding.generateButton.isEnabled = true
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
