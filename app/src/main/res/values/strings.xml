@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">1017_testTensorFlow</string>
+    <string name="error_loading_model">Error loading model</string>
+    <string name="generate_text">Generate text</string>
+    <string name="generating_text">Generating text\.\.\.</string>
+    <string name="result">Result\:</string>
+    <string name="write_initial_text">Write initial text\.\.\.</string>
 </resources>

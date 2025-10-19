@@ -35,6 +35,9 @@ android {
     kotlin {
         jvmToolchain (21)
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
