@@ -7,3 +7,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+app/src/main/assets/gpt2_spanish_quantized.tflite
